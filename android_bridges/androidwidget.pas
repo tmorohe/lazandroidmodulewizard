@@ -885,6 +885,9 @@ type
     function GetMainActivityName: string;
     function GetPackageName: string;
 
+    function GetAppVersionCode: integer;
+    function GetAppVersionName: string;
+
     //properties
     property Initialized : boolean read FInitialized;
     property Form: jForm read FForm write FForm; // Main Form
@@ -893,6 +896,8 @@ type
     property MainActivityName: string read GetMainActivityName;
     property PackageName  : string read GetPackageName;
     property APILevel: Integer read FAPILevel;
+    property VersionCode: Integer read GetAppVersionCode;
+    property VersionName: string read GetAppVersionName;
   end;
 
  {jControl by jmpessoa}
@@ -1690,6 +1695,8 @@ function  jApp_GetStringResourceById(env:PJNIEnv;this:jobject; _resId: integer )
 function  jApp_GetStringResourceByName(env:PJNIEnv;this:jobject; _resName: string): string;
 function  jApp_GetQuantityStringByName(env:PJNIEnv;this:jobject; _resName: string; _Quantity: integer): string;
 
+function jApp_GetAppVersionCode(env: PJNIEnv; this: jObject): integer;
+function jApp_GetAppVersionName(env: PJNIEnv; this: jObject): string;
 //------------------------------------------------------------------------------
 // Form
 //------------------------------------------------------------------------------
@@ -6437,6 +6444,16 @@ begin
     Result:= Self.AppName;
 end;
 
+function jApp.GetAppVersionCode: integer;
+begin
+  Result := jApp_GetAppVersionCode(Self.Jni.jEnv, Self.Jni.jThis);
+end;
+
+function jApp.GetAppVersionName: string;
+begin
+  Result := jApp_GetAppVersionName(Self.Jni.jEnv, Self.Jni.jThis);
+end;
+
    { generics }
 Function InputTypeToStrEx ( InputType : TInputTypeEx ) : String;
  begin
@@ -7518,6 +7535,37 @@ begin
   _jParams[1].i:= _Quantity;
   _jString:= env^.CallObjectMethodA(env,this,_jMethod,@_jParams);
    env^.DeleteLocalRef(env,_jParams[0].l); //added..
+  Case _jString = nil of
+   True : Result    := '';
+   False: begin
+           _jBoolean := JNI_False;
+           Result    := String( env^.GetStringUTFChars(Env,_jString,@_jBoolean) );
+          end;
+  end;
+  env^.DeleteLocalRef(env, _cls);
+end;
+
+function jApp_GetAppVersionCode(env:PJNIEnv;this:jobject): integer;
+var
+  _cls: jClass = nil;
+  _jMethod: jMethodID = nil;
+begin
+  _cls := env^.GetObjectClass(env, this);
+  _jMethod := env^.GetMethodID(env, _cls, 'getAppVersionCode', '()I');
+  Result := env^.CallIntMethod(env, this, _jMethod);
+  env^.DeleteLocalRef(env, _cls);
+end;
+
+function jApp_GetAppVersionName(env:PJNIEnv;this:jobject): string;
+var
+ _cls: jClass;
+ _jMethod : jMethodID = nil;
+ _jString : jstring;
+ _jBoolean: jBoolean;
+begin
+  _cls := env^.GetObjectClass(env, this);
+  _jMethod:= env^.GetMethodID(env, _cls, 'getAppVersionName', '()Ljava/lang/String;');
+  _jString:= env^.CallObjectMethod(env,this,_jMethod);
   Case _jString = nil of
    True : Result    := '';
    False: begin

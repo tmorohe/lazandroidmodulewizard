@@ -64,6 +64,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
@@ -2076,6 +2077,29 @@ public String GetControlsVersionInfo() {
 public long getTick() {
   return ( System.currentTimeMillis() );
 }
+
+public int getAppVersionCode() {
+	PackageManager pm = this.activity.getPackageManager();
+	int versionCode = 0;
+	try{
+		PackageInfo packageInfo = pm.getPackageInfo(this.activity.getPackageName(), 0);
+		versionCode = packageInfo.versionCode;
+	}catch(NameNotFoundException e){
+	}
+	return versionCode;
+}
+
+public String getAppVersionName() {
+	PackageManager pm = this.activity.getPackageManager();
+	String versionName = "";
+	try{
+		PackageInfo packageInfo = pm.getPackageInfo(this.activity.getPackageName(), 0);
+		versionName = packageInfo.versionName;
+	}catch(NameNotFoundException e) {
+	}
+	return versionName;
+}
+
 // -------------------------------------------------------------------------
 //  Android path
 // -------------------------------------------------------------------------
